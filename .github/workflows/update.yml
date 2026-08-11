@@ -1,0 +1,30 @@
+name: Update AmazonBot IPs
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 매일 UTC 자정(한국시간 오전 9시)에 실행
+  workflow_dispatch: # 수동 실행 버튼을 만들어주는 옵션
+
+jobs:
+  update-ips:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      
+      - name: Run Python script
+        run: python update_ips.py
+        
+      - name: Commit and push if changed
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add amazonbot_ips.txt
+          # 변경사항이 있을 때만 커밋(에러 방지용 || exit 0)
+          git commit -m "Automated IP list update" || exit 0
+          git push
